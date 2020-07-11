@@ -7,10 +7,15 @@ def drop_bobber():
 	th_bobber=threading.Thread(target=_u.img_loop_detect, args=('do_not_drop.png', e_imgfound, e_stop, None))
 	th_bobber.start()
 	e_imgfound.wait(timeout=10)
-	e_stop.set()
-	th_bobber.join()
-	if e_imgfound.is_set():	return _u.pos_click(*_u.get_imgctr('wheel.png'))
-	else: return False
+	if e_imgfound.is_set():
+		_u.pos_click(*_u.get_imgctr('wheel.png'))
+		e_stop.set()
+		th_bobber.join()
+		return True
+	else: 
+		e_stop.set()
+		th_bobber.join()
+		return False
 	
 if __name__=='__main__':
 	pass
