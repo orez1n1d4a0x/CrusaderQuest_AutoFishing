@@ -33,7 +33,7 @@ def img_loop_detect(imgname, e_get, e_stop, searchArea=None):
 	t=threading.currentThread()
 	while True:
 		if e_stop.is_set(): break
-		if not get_imgctr(imgname, region=searchArea):
+		if get_imgctr(imgname, region=searchArea):
 			e_get.set()
 			break
 if __name__=='__main__':
