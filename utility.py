@@ -29,11 +29,10 @@ def getArea():
 	print(s,e)
 	return s+e
 def img_loop_detect(imgname, e_get, e_stop, searchArea=None):
-	now=dt.now()
 	t=threading.currentThread()
 	while True:
 		if e_stop.is_set(): break
-		if get_imgctr(imgname, region=searchArea):
+		if not get_imgctr(imgname, region=searchArea):
 			e_get.set()
 			break
 if __name__=='__main__':
