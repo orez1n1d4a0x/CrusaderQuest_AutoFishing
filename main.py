@@ -13,7 +13,6 @@ def drop_bobber():
 	e_imgfound.wait(timeout=10)
 	if e_imgfound.is_set():
 		_u.pos_click(*pos_wheel)
-		print('click')
 		e_stop.set()
 		th_bobber.join()
 		return True
