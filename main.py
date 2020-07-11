@@ -4,7 +4,7 @@ import time
 def drop_bobber():
 	e_imgfound=threading.Event()
 	e_stop=threading.Event()
-	th_bobber=threading.Thread(target=_u.img_loop_detect, args=('do_not_drop.png', e_imgfound, e_stop, None))
+	th_bobber=threading.Thread(target=_u.img_loop_detect, args=('do_not_drop.png', e_imgfound, e_stop, _u.getArea()))
 	th_bobber.start()
 	e_imgfound.wait(timeout=10)
 	if e_imgfound.is_set():
