@@ -7,6 +7,10 @@ _g.PAUSE = 1
 _g.FAILSAFE = True  
 def get_imgpos(imgname, region=None):	return _g.locateOnScreen(imgname, region=region)
 def get_imgctr(imgname, region=None):	return _g.locateCenterOnScreen(imgname, region=region)
+def loop_getimg(imgname, region=None, timeout=10):
+	now=dt.now()
+	while True:
+		x=get_imgctr(imgname, region)
 def pos_click(x,y):	_g.click(x,y)
 
 def onClick(x, y, button, pressed):
@@ -29,12 +33,21 @@ def getArea():
 	print(s,e)
 	return s+e
 def img_loop_detect(imgname, e_get, e_stop, searchArea=None):
-	t=threading.currentThread()
+	# t=threading.currentThread()
 	while True:
 		if not get_imgctr(imgname, region=searchArea):
+			print('to drop')
 			e_get.set()
 			break
 		if e_stop.is_set(): break
+def mouse_drag( pos_s, pos_e, e_release):
+	_g.moveTo(pos_s)
+	_g.mouseDown()
+	print('down')
+	_g.moveTo(pos_e)
+	e_release.wait(timeout=5)
+	print('release')
+	_g.mouseUp()
 if __name__=='__main__':
 	pass
 	img_loop_detect('test.png')
