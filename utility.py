@@ -23,31 +23,29 @@ def is_clicked():
 			if (dt.now()-now).seconds > 30:
 				l.stop()
 				return
+def getPos(name):
+	input( f'move to {name} postition and press enter')
+	return _g.position()
 def getArea():
-	print('please click first coordinate...')
-	is_clicked()
+	input('please move to first coordinate and press enter')
 	s=_g.position()
-	print('please click second coordinate...')
-	is_clicked()
+	input('please move to second coordinate and press enter')
 	e=_g.position()
 	print(s,e)
 	return s+e
-def img_loop_detect(imgname, e_get, e_stop, searchArea=None):
-	# t=threading.currentThread()
+def img_loop_detect(imgname, pos, e_get, e_stop, searchArea=None):
 	while True:
 		if not get_imgctr(imgname, region=searchArea):
 			print('to drop')
 			e_get.set()
 			break
 		if e_stop.is_set(): break
-def mouse_drag( pos_s, pos_e, e_release):
-	_g.moveTo(pos_s)
-	_g.mouseDown()
-	print('down')
-	_g.moveTo(pos_e)
-	e_release.wait(timeout=5)
-	print('release')
-	_g.mouseUp()
+def drag( pos, t):
+	from pynput.mouse import Button, Controller
+	mouse = Controller()
+	mouse.press(Button.left)
+	sleep(t)
+	mouse.release(Button.left)
 if __name__=='__main__':
 	pass
 	img_loop_detect('test.png')
