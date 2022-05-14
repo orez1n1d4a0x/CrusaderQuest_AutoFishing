@@ -1,59 +1,89 @@
 import utility as _u
 import threading
+from datetime import datetime, timedelta
 from time import sleep
 
-from pynput.mouse import Button, Controller
-mouse = Controller()
+import pyautogui
+pyautogui.PAUSE = 1
+pyautogui.FAILSAFE = True  
 
-def drop_bobber(pos_wheel, searchArea):
-	e_imgfound=threading.Event()
-	e_stop=threading.Event()
-	mouse.position=tuple(pos_wheel)
+from pynput.mouse import Button, Controller
+from pynput import keyboard
+mouse = Controller()
+e_main=threading.Event()
+e_drop=threading.Event()
+e_stop=threading.Event()
+
+def mouse_click(pos):
+	mouse.psition=tuple(pos)
 	mouse.click(Button.left, 1)
-	th_bobber=threading.Thread(target=_u.img_loop_detect, args=('no_bar_hover.png', pos_wheel, e_imgfound, e_stop, searchArea))
-	th_bobber.start()
-	e_imgfound.wait(timeout=5)
-	if e_imgfound.is_set():
-		mouse.click(Button.left, 1)
-		print('drop')
-		e_stop.set()
-		# th_bobber.join()
+def mouse_release(pos):
+	mouse.psition=tuple(pos)
+	mouse.release(Button.left)
+def mouse_press(pos):
+	mouse.psition=tuple(pos)
+	mouse.press(Button.left)
+
+def checking_bobber(pos_wheel):
+	sleep(1)
+	mouse_click(pos_wheel) # throwing bobber
+	thd_bobber=threading.Thread(target=_u.img_loop_detect, args=('no_bar_hover_2.png', e_drop, e_main))
+	sleep(1)
+	thd_bobber.start()
+	e_drop.wait(timeout=5)
+	if e_drop.is_set():
+		e_drop.clear()
+		print(e_drop.is_set())
+		mouse_click(pos_wheel) # confirm bobber
+		# e_stop.set()
 		return True
-	else: 
-		e_stop.set()
-		th_bobber.join()
+	else:
+		# e_stop.set()
+		thd_bobber.join() # wait thd_bobber close
 		return False
 
-def dropHook( pos):
-	print('drop hook')
-	mouse.position=tuple(pos)
-	mouse.click(Button.left, 1)
-def liftHook( pos):
-	sleep(4.5)
-	mouse.position=tuple(pos)
-	mouse.click(Button.left, 1)
-	print('lift hook')
-def rotateHook(pos):
-	sleep(2)
-	print('rotate hook')
-	_u.drag(pos, 1.5)
-	for i in range(10):
-		_u.drag(pos, 0.5)
-		sleep(0.5/2.1)
-		print(i)
+def liftBobber( pos):
+	if _u.loop_getimg('on_the_hook.png', e_main, tlimit=10):
+		mouse_click(pos)
+		print('lift bobber')
+
+def fishing(wheel_pos):
+	now=datetime.now()
+	while not _u.getimg('continue_button.png') and datetime.now()-now < timedelta(seconds=60):
+		if e_main.is_set():	break
+		if _u.getimg('safe_zone.png'):
+			mouse_release(wheel_pos)
+			sleep(0.1)
+		else:
+			mouse_press(wheel_pos)
+			sleep(0.15)
+	mouse_release(wheel_pos)
 def start():
+	
+	def on_release(key):
+		print('{0} released'.format(key))
+		if key == keyboard.Key.ctrl_l:
+			print('Stop listener')
+			e_main.set()
+			return False
+	listener = keyboard.Listener(
+    	on_release=on_release)
+	listener.start()
 	wheel_pos=_u.getPos('wheel')
 	continue_pos=_u.getPos('continue')
-	searchArea=_u.getArea()
-	while True:
-		if drop_bobber(wheel_pos, searchArea):
+	sleep(1)
+	while not e_main.is_set():
+		if checking_bobber(wheel_pos):
+			sleep(3)
+			liftBobber(wheel_pos)
 			sleep(2)
-			liftHook(wheel_pos)
-			rotateHook(wheel_pos)
-			mouse.position=tuple(continue_pos)
-			sleep(10)
-			mouse.click(Button.left, 1)
-			sleep(2)
+			fishing(wheel_pos)
+			sleep(1)
+			mouse_click(continue_pos)
+			# sleep(10)
+			# mouse.position=tuple(continue_pos)
+			# mouse.click(Button.left, 1)
+			# sleep(2)
 if __name__=='__main__':
 	pass
 	start()
